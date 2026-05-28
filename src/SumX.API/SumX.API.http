@@ -1,0 +1,6 @@
+@SumX.API_HostAddress = http://localhost:5290
+
+GET {{SumX.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
