@@ -24,7 +24,7 @@ public sealed class ApplicationUser : AggregateRoot
 
     public string? TenantId { get; }
 
-    public string Role { get; }
+    public string Role { get; private set; }
 
     public DateTime CreatedAt { get; }
 
@@ -68,6 +68,12 @@ public sealed class ApplicationUser : AggregateRoot
     public void ChangeEmail(string newEmail)
     {
         Email = newEmail ?? throw new ArgumentNullException(nameof(newEmail));
+    }
+
+    public void ChangeRole(string newRole)
+    {
+        Role = ValidateRole(newRole);
+        EnforceTenantIsolation(Role, TenantId);
     }
 
     private static Guid ValidateId(Guid id)

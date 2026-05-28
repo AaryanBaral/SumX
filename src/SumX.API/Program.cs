@@ -75,7 +75,6 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "❌ Error while connecting to database.");
     }
 }
-app.MapControllers();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -87,5 +86,6 @@ app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapControllers();
 
 app.Run();

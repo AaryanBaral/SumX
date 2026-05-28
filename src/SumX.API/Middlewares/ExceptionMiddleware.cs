@@ -52,6 +52,17 @@ public sealed class ExceptionMiddleware
                 message = exception.Message;
                 break;
 
+            case ForbiddenException:
+                status = HttpStatusCode.Forbidden;
+                message = exception.Message;
+                break;
+
+            case AppValidationException validationEx:
+                status = HttpStatusCode.BadRequest;
+                message = validationEx.Message;
+                errors = validationEx.Errors;
+                break;
+
             case NotFoundException:
                 status = HttpStatusCode.NotFound;
                 message = exception.Message;

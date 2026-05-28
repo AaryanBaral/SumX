@@ -1,5 +1,5 @@
-
 using Microsoft.AspNetCore.Identity;
+using SumX.Application.Common.Exceptions;
 using SumX.Application.User.Interface;
 using SumX.Domain.Entities;
 using SumX.Infrastructure.Persistence.Master.Identity;
@@ -48,8 +48,10 @@ namespace SumX.Infrastructure.Persistence.Master.Repositories
 
             if (!result.Succeeded)
             {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new Exception($"User creation failed: {errors}");
+                throw new AppValidationException(
+                    result.Errors.Select(error => new FluentValidation.Results.ValidationFailure(
+                        error.Code,
+                        error.Description)));
             }
 
             return identityUser.Id;
@@ -64,7 +66,26 @@ namespace SumX.Infrastructure.Persistence.Master.Repositories
 
             user.Role = role;
 
-            await _userManager.UpdateAsync(user);
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                throw new AppValidationException(
+                    updateResult.Errors.Select(error => new FluentValidation.Results.ValidationFailure(
+                        error.Code,
+                        error.Description)));
+            }
+
+            if (!await _userManager.IsInRoleAsync(user, role))
+            {
+                var roleResult = await _userManager.AddToRoleAsync(user, role);
+                if (!roleResult.Succeeded)
+                {
+                    throw new AppValidationException(
+                        roleResult.Errors.Select(error => new FluentValidation.Results.ValidationFailure(
+                            error.Code,
+                            error.Description)));
+                }
+            }
         }
 
         public async Task AssignTenantAsync(Guid userId, string tenantId)
@@ -78,6 +99,73 @@ namespace SumX.Infrastructure.Persistence.Master.Repositories
 
             await _userManager.UpdateAsync(user);
         }
+
+        public async Task UpdateAsync(ApplicationUser user)
+        {
+            var identityUser = await _userManager.FindByIdAsync(user.Id.ToString());
+
+            if (identityUser is null)
+            {
+                throw new NotFoundException("User not found");
+            }
+
+            identityUser.Email = user.Email;
+            identityUser.UserName = user.Email;
+            identityUser.TenantId = user.TenantId;
+            identityUser.Role = user.Role;
+            identityUser.CreatedAt = user.CreatedAt;
+
+            var updateResult = await _userManager.UpdateAsync(identityUser);
+            if (!updateResult.Succeeded)
+            {
+                throw new AppValidationException(
+                    updateResult.Errors.Select(error => new FluentValidation.Results.ValidationFailure(
+                        error.Code,
+                        error.Description)));
+            }
+
+            var existingRoles = await _userManager.GetRolesAsync(identityUser);
+            if (existingRoles.Count > 0)
+            {
+                var removeResult = await _userManager.RemoveFromRolesAsync(identityUser, existingRoles);
+                if (!removeResult.Succeeded)
+                {
+                    throw new AppValidationException(
+                        removeResult.Errors.Select(error => new FluentValidation.Results.ValidationFailure(
+                            error.Code,
+                            error.Description)));
+                }
+            }
+
+            var roleResult = await _userManager.AddToRoleAsync(identityUser, user.Role);
+            if (!roleResult.Succeeded)
+            {
+                throw new AppValidationException(
+                    roleResult.Errors.Select(error => new FluentValidation.Results.ValidationFailure(
+                        error.Code,
+                        error.Description)));
+            }
+        }
+
+        public async Task DeleteAsync(Guid userId)
+        {
+            var identityUser = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (identityUser is null)
+            {
+                throw new NotFoundException("User not found");
+            }
+
+            var deleteResult = await _userManager.DeleteAsync(identityUser);
+            if (!deleteResult.Succeeded)
+            {
+                throw new AppValidationException(
+                    deleteResult.Errors.Select(error => new FluentValidation.Results.ValidationFailure(
+                        error.Code,
+                        error.Description)));
+            }
+        }
+
         public async Task<bool> CheckPasswordAsync(string email, string password)
         {
             var user = await _userManager.FindByEmailAsync(email);
