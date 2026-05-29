@@ -15,7 +15,7 @@ namespace SumX.Infrastructure.Persistence.Master.Repositories
             _context = context;
         }
 
-        public async Task<Tenant?> GetByIdAsync(string id, bool trackChanges = false)
+        public async Task<Tenant?> GetByIdAsync(Guid id, bool trackChanges = false)
         {
             return trackChanges
                 ? await _context.Tenants.FirstOrDefaultAsync(t => t.Id == id)
@@ -48,7 +48,7 @@ namespace SumX.Infrastructure.Persistence.Master.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(string id)
+        public async Task DeleteAsync(Guid id)
         {
             var tenant = await _context.Tenants.FindAsync(id);
             if (tenant != null)

@@ -28,9 +28,15 @@ namespace SumX.Infrastructure.Auth
                 throw new InvalidOperationException("Tenant context is missing for the current request.");
             }
 
+            Guid? tenantGuid = null;
+            if (Guid.TryParse(TenantId, out var parsedGuid))
+            {
+                tenantGuid = parsedGuid;
+            }
+
             var tenant = await _masterDbContext.Tenants
-                .AsNoTracking()
-                .FirstOrDefaultAsync(t => t.Id == TenantId || t.TenantId == TenantId);
+                 .AsNoTracking()
+                 .FirstOrDefaultAsync(t => t.Id == tenantGuid || t.TenantId == TenantId);
 
             if (tenant == null)
             {

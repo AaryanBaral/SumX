@@ -16,7 +16,7 @@ public sealed class MasterApplicationUserConfiguration : IEntityTypeConfiguratio
                 $"\"Role\" IN ('{Roles.SuperAdmin}', '{Roles.Admin}', '{Roles.Employee}')"));
 
         builder.Property(user => user.TenantId)
-            .HasMaxLength(36);
+            .HasMaxLength(4);
 
         builder.Property(user => user.Role)
             .IsRequired()
@@ -28,6 +28,7 @@ public sealed class MasterApplicationUserConfiguration : IEntityTypeConfiguratio
         builder.HasOne<Tenant>()
             .WithMany()
             .HasForeignKey(user => user.TenantId)
+            .HasPrincipalKey(tenant => tenant.TenantId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

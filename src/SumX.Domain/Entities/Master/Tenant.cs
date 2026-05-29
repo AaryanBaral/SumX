@@ -5,7 +5,7 @@ namespace SumX.Domain.Entities.Master;
 public sealed class Tenant
 {
     private Tenant(
-        string id,
+        Guid id,
         string name,
         string email,
         string tenantId,
@@ -18,7 +18,7 @@ public sealed class Tenant
         DatabaseConnectionString = ValidateRequired(databaseConnectionString, "Tenant database connection string");
     }
 
-    public string Id { get; }
+    public Guid Id { get; }
 
     public string Name { get; private set; }
 
@@ -29,7 +29,7 @@ public sealed class Tenant
     public string DatabaseConnectionString { get; private set; }
 
     public static Tenant Create(
-        string id,
+        Guid id,
         string name,
         string email,
         string tenantId,
@@ -53,8 +53,14 @@ public sealed class Tenant
 
     public string GetDatabaseName() => TenantId;
 
-    private static string ValidateId(string id) =>
-        ValidateRequired(id, "Tenant id");
+    private static Guid ValidateId(Guid id)
+    {
+        if (id == Guid.Empty)
+        {
+            throw new DomainException("Tenant id cannot be empty.");
+        }
+        return id;
+    }
 
     private static string ValidateTenantId(string tenantId)
     {

@@ -6,10 +6,10 @@ namespace SumX.Application.Common.Abstractions.Persistence
 {
     public interface IEmployeeRepository
     {
-        Task<Employee?> GetByIdAsync(string id, bool trackChanges = false);
+        Task<Employee?> GetByIdAsync(Guid id, bool trackChanges = false);
         Task<IEnumerable<Employee>> GetAllAsync(bool trackChanges = false);
         Task CreateAsync(Employee employee);
         Task UpdateAsync(Employee employee);
-        Task DeleteAsync(string id);
+        Task DeleteAsync(Guid id);
     }
 }

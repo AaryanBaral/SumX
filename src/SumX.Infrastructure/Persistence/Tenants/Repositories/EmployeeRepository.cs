@@ -15,7 +15,7 @@ namespace SumX.Infrastructure.Persistence.Tenants.Repositories
             _context = context;
         }
 
-        public async Task<Employee?> GetByIdAsync(string id, bool trackChanges = false)
+        public async Task<Employee?> GetByIdAsync(Guid id, bool trackChanges = false)
         {
             return trackChanges
                 ? await _context.Employees.FirstOrDefaultAsync(e => e.Id == id)
@@ -41,7 +41,7 @@ namespace SumX.Infrastructure.Persistence.Tenants.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(string id)
+        public async Task DeleteAsync(Guid id)
         {
             var employee = await _context.Employees.FindAsync(id);
             if (employee != null)

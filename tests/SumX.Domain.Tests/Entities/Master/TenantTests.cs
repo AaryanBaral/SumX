@@ -9,14 +9,15 @@ public class TenantTests
     [Fact]
     public void Create_ShouldSucceed_WhenTenantIsValid()
     {
+        var id = Guid.NewGuid();
         var tenant = MasterTenant.Create(
-            "tenant-id-1",
+            id,
             "Acme Inc",
             "admin@acme.com",
             "acme",
             "Host=localhost;Database=ACME;Username=postgres;Password=postgres");
 
-        tenant.Id.Should().Be("tenant-id-1");
+        tenant.Id.Should().Be(id);
         tenant.Name.Should().Be("Acme Inc");
         tenant.Email.Should().Be("admin@acme.com");
         tenant.TenantId.Should().Be("ACME");
@@ -31,7 +32,7 @@ public class TenantTests
     public void Create_ShouldThrow_WhenTenantIdIsNotFourCharacters(string tenantId)
     {
         var act = () => MasterTenant.Create(
-            "tenant-id-1",
+            Guid.NewGuid(),
             "Acme Inc",
             "admin@acme.com",
             tenantId,
@@ -44,7 +45,7 @@ public class TenantTests
     public void Create_ShouldThrow_WhenConnectionStringIsEmpty()
     {
         var act = () => MasterTenant.Create(
-            "tenant-id-1",
+            Guid.NewGuid(),
             "Acme Inc",
             "admin@acme.com",
             "ACME",

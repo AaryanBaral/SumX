@@ -1,0 +1,42 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
+using SumX.Application.Common.Abstractions;
+using SumX.Application.Common.Abstractions.Persistence.Master;
+using SumX.Application.Common.Exceptions;
+using SumX.Domain.Constants;
+using SumX.Domain.Entities.Master;
+
+namespace SumX.Application.Tenants.Queries.GetTenantById
+{
+    public sealed class GetTenantByIdHandler : IRequestHandler<GetTenantByIdQuery, Tenant?>
+    {
+        private readonly ITenantRepository _tenantRepository;
+        private readonly ICurrentUserContext _currentUserContext;
+
+        public GetTenantByIdHandler(
+            ITenantRepository tenantRepository,
+            ICurrentUserContext currentUserContext)
+        {
+            _tenantRepository = tenantRepository;
+            _currentUserContext = currentUserContext;
+        }
+
+        public async Task<Tenant?> Handle(GetTenantByIdQuery request, CancellationToken cancellationToken)
+        {
+            if (!string.Equals(_currentUserContext.Role, Roles.SuperAdmin, StringComparison.Ordinal))
+            {
+                throw new ForbiddenException("Only SuperAdmins are allowed to manage tenants.");
+            }
+
+            var tenant = await _tenantRepository.GetByIdAsync(request.Id, request.TrackChanges);
+            if (tenant is null)
+            {
+                throw new NotFoundException("Tenant not found.");
+            }
+
+            return tenant;
+        }
+    }
+}

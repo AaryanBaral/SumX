@@ -5,23 +5,23 @@ namespace SumX.Domain.Entities.Tenants;
 public sealed class Employee
 {
     private Employee(
-        string id,
+        Guid id,
         string fullName,
         string email)
     {
-        Id = ValidateRequired(id, "Employee id");
+        Id = ValidateId(id);
         FullName = ValidateRequired(fullName, "Employee full name");
         Email = email ?? throw new ArgumentNullException(nameof(email));
     }
 
-    public string Id { get; }
+    public Guid Id { get; }
 
     public string FullName { get; private set; }
 
     public string Email { get; private set; }
 
     public static Employee Create(
-        string id,
+        Guid id,
         string fullName,
         string email) =>
         new(id, fullName, email);
@@ -34,6 +34,15 @@ public sealed class Employee
     public void ChangeEmail(string email)
     {
         Email = email ?? throw new ArgumentNullException(nameof(email));
+    }
+
+    private static Guid ValidateId(Guid id)
+    {
+        if (id == Guid.Empty)
+        {
+            throw new DomainException("Employee id cannot be empty.");
+        }
+        return id;
     }
 
     private static string ValidateRequired(string value, string fieldName)
