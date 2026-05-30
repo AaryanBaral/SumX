@@ -1,14 +1,15 @@
-
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using FluentValidation.Results;
 using MediatR;
 using SumX.Application.Common.Abstractions;
 using SumX.Application.Common.Exceptions;
-using SumX.Application.User.Command.RegisterUser;
 using SumX.Application.User.Interface;
 using SumX.Domain.Constants;
 using SumX.Domain.Entities;
 
-namespace SumX.Application.User.Command.RegisterUser
+namespace SumX.Application.Auth.Commands.RegisterUser
 {
     public sealed class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Guid>
     {
@@ -31,7 +32,7 @@ namespace SumX.Application.User.Command.RegisterUser
             }
 
             var adminTenantId = _currentUserContext.TenantId;
-            if (string.IsNullOrWhiteSpace(adminTenantId))
+            if (!adminTenantId.HasValue)
             {
                 throw new ForbiddenException("Admin user must belong to a tenant context.");
             }
@@ -51,7 +52,7 @@ namespace SumX.Application.User.Command.RegisterUser
             var newUser = ApplicationUser.CreateTenantUser(
                 id: Guid.NewGuid(),
                 emailAddress: request.Email,
-                tenantId: adminTenantId,
+                tenantId: adminTenantId.Value,
                 role: request.Role);
 
             var userId = await _userRepository.CreateAsync(newUser, request.Password);

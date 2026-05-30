@@ -3,14 +3,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SumX.API.Models.User;
 using SumX.Application.User.Command.DeleteUser;
-using SumX.Application.User.Command.RegisterUser;
+using SumX.Application.Auth.Commands.RegisterUser;
 using SumX.Application.User.Command.UpdateUser;
 using SumX.Domain.Constants;
 
 namespace SumX.API.Controllers.Users;
 
 [ApiController]
-[Route("api/users")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/users")]
 [Authorize(Roles = Roles.Admin)]
 public sealed class UsersController : ControllerBase
 {

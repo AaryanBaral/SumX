@@ -16,7 +16,8 @@ using SumX.Domain.Entities.Master;
 namespace SumX.API.Controllers.Tenants
 {
     [ApiController]
-    [Route("api/tenants")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/tenants")]
     [Authorize(Roles = Roles.SuperAdmin)]
     public sealed class TenantsController : ControllerBase
     {

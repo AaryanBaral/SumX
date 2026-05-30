@@ -20,6 +20,7 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
 
         builder.Property(tenant => tenant.Email)
             .IsRequired()
+            .HasColumnName("EmailAddress")
             .HasMaxLength(256);
 
         builder.Property(tenant => tenant.TenantId)
@@ -29,6 +30,7 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
 
         builder.Property(tenant => tenant.DatabaseConnectionString)
             .IsRequired()
+            .HasColumnName("DbConnStr")
             .HasMaxLength(2048);
 
         builder.HasIndex(tenant => tenant.TenantId)

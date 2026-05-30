@@ -13,7 +13,7 @@ namespace SumX.Application.User.Interface
 
         Task AssignRoleAsync(Guid userId, string role);
 
-        Task AssignTenantAsync(Guid userId, string tenantId);
+        Task AssignTenantAsync(Guid userId, Guid tenantId);
         Task UpdateAsync(ApplicationUser user);
         Task DeleteAsync(Guid userId);
         Task<bool> CheckPasswordAsync(string email, string password);

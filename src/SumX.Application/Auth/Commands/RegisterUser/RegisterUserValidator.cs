@@ -1,8 +1,7 @@
 using FluentValidation;
-using SumX.Application.User.Command.RegisterUser;
 using SumX.Domain.Constants;
 
-namespace SumX.Application.User.Command.RegisterUser;
+namespace SumX.Application.Auth.Commands.RegisterUser;
 
 public sealed class RegisterUserValidator : AbstractValidator<RegisterUserCommand>
 {

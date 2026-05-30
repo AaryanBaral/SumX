@@ -10,6 +10,7 @@ namespace SumX.Infrastructure.Auth
     {
         private readonly ICurrentUserContext _currentUserContext;
         private readonly MasterDbContext _masterDbContext;
+        private Guid? _resolvedTenantId;
 
         public TenantProvider(
             ICurrentUserContext currentUserContext,
@@ -19,24 +20,24 @@ namespace SumX.Infrastructure.Auth
             _masterDbContext = masterDbContext;
         }
 
-        public string? TenantId => _currentUserContext.TenantId;
+        public Guid? TenantId => _resolvedTenantId ?? _currentUserContext.TenantId;
+
+        public Task SetTenantAsync(Guid tenantId)
+        {
+            _resolvedTenantId = tenantId;
+            return Task.CompletedTask;
+        }
 
         public async Task<string> GetConnectionStringAsync()
         {
-            if (string.IsNullOrEmpty(TenantId))
+            if (!TenantId.HasValue)
             {
                 throw new InvalidOperationException("Tenant context is missing for the current request.");
             }
 
-            Guid? tenantGuid = null;
-            if (Guid.TryParse(TenantId, out var parsedGuid))
-            {
-                tenantGuid = parsedGuid;
-            }
-
             var tenant = await _masterDbContext.Tenants
                  .AsNoTracking()
-                 .FirstOrDefaultAsync(t => t.Id == tenantGuid || t.TenantId == TenantId);
+                 .FirstOrDefaultAsync(t => t.Id == TenantId.Value);
 
             if (tenant == null)
             {

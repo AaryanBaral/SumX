@@ -15,6 +15,6 @@ namespace SumX.Application.Auth.DTOs
 
         public string Role { get; init; } = string.Empty;
 
-        public string? TenantId { get; init; }
+        public Guid? TenantId { get; init; }
     }
 }

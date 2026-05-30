@@ -27,7 +27,7 @@ public sealed class DeleteUserHandler : IRequestHandler<DeleteUserCommand, Guid>
         }
 
         var adminTenantId = _currentUserContext.TenantId;
-        if (string.IsNullOrWhiteSpace(adminTenantId))
+        if (!adminTenantId.HasValue)
         {
             throw new ForbiddenException("Admin user must belong to a tenant context.");
         }
@@ -38,7 +38,7 @@ public sealed class DeleteUserHandler : IRequestHandler<DeleteUserCommand, Guid>
             throw new NotFoundException("User not found");
         }
 
-        if (!string.Equals(user.TenantId, adminTenantId, StringComparison.Ordinal))
+        if (user.TenantId != adminTenantId)
         {
             throw new ForbiddenException("You can only delete users in your own tenant.");
         }

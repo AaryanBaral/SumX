@@ -41,7 +41,7 @@ namespace SumX.Infrastructure.Persistence.Master.Mapper
             return ApplicationUser.CreateTenantUser(
                 id: user.Id,
                 emailAddress: user.Email!,
-                tenantId: user.TenantId!,
+                tenantId: user.TenantId!.Value,
                 role: user.Role,
                 createdAtUtc: user.CreatedAt);
         }

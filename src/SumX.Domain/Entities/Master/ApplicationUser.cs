@@ -9,20 +9,20 @@ public sealed class ApplicationUser : AggregateRoot
     private ApplicationUser(
         Guid id,
         string emailAddress,
-        string? tenantId,
+        Guid? tenantId,
         string role,
         DateTime createdAt)
         : base(ValidateId(id))
     {
         Email = emailAddress ?? throw new ArgumentNullException(nameof(emailAddress));
-        TenantId = NormalizeTenantId(tenantId);
+        TenantId = tenantId == Guid.Empty ? null : tenantId;
         Role = ValidateRole(role);
         CreatedAt = EnsureUtc(createdAt);
 
         EnforceTenantIsolation(Role, TenantId);
     }
 
-    public string? TenantId { get; }
+    public Guid? TenantId { get; }
 
     public string Role { get; private set; }
 
@@ -33,7 +33,7 @@ public sealed class ApplicationUser : AggregateRoot
     public static ApplicationUser CreateSuperAdmin(
         Guid id,
         string emailAddress,
-        string? tenantId = null,
+        Guid? tenantId = null,
         DateTime? createdAtUtc = null) =>
         new(
             id,
@@ -45,7 +45,7 @@ public sealed class ApplicationUser : AggregateRoot
     public static ApplicationUser CreateTenantUser(
         Guid id,
         string emailAddress,
-        string tenantId,
+        Guid tenantId,
         string role,
         DateTime? createdAtUtc = null) =>
         new(
@@ -86,22 +86,19 @@ public sealed class ApplicationUser : AggregateRoot
         return id;
     }
 
-    private static string? NormalizeTenantId(string? tenantId) =>
-        string.IsNullOrWhiteSpace(tenantId) ? null : tenantId.Trim();
-
     private static DateTime EnsureUtc(DateTime value) =>
         value.Kind == DateTimeKind.Utc
             ? value
             : throw new DomainException("CreatedAt must be in UTC.");
 
-    private static void EnforceTenantIsolation(string role, string? tenantId)
+    private static void EnforceTenantIsolation(string role, Guid? tenantId)
     {
-        if (string.Equals(role, Roles.SuperAdmin, StringComparison.Ordinal) && tenantId is not null)
+        if (string.Equals(role, Roles.SuperAdmin, StringComparison.Ordinal) && tenantId.HasValue)
         {
             throw new DomainException("SuperAdmin must not belong to a tenant.");
         }
 
-        if (!string.Equals(role, Roles.SuperAdmin, StringComparison.Ordinal) && tenantId is null)
+        if (!string.Equals(role, Roles.SuperAdmin, StringComparison.Ordinal) && !tenantId.HasValue)
         {
             throw new DomainException("Admin and Employee users must belong to a tenant.");
         }

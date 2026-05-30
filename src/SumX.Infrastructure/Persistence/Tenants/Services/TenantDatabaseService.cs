@@ -36,7 +36,12 @@ namespace SumX.Infrastructure.Persistence.Tenants.Services
                 _connectionString = connectionString;
             }
 
-            public string? TenantId => null;
+            public Guid? TenantId => null;
+
+            public Task SetTenantAsync(Guid tenantId)
+            {
+                return Task.CompletedTask;
+            }
 
             public Task<string> GetConnectionStringAsync()
             {

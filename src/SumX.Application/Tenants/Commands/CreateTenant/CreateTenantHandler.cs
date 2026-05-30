@@ -78,7 +78,7 @@ namespace SumX.Application.Tenants.Commands.CreateTenant
             var adminUser = ApplicationUser.CreateTenantUser(
                 id: Guid.NewGuid(),
                 emailAddress: request.Email,
-                tenantId: normalizedCode,
+                tenantId: tenantId,
                 role: Roles.Admin);
 
             var userId = await _userRepository.CreateAsync(adminUser, request.AdminPassword);

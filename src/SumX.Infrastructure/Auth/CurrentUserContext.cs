@@ -20,15 +20,26 @@ namespace SumX.Infrastructure.Auth
         {
             get
             {
-                var sub = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                var sub = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
                     ?? User?.FindFirst("sub")?.Value;
-                
+
                 return Guid.TryParse(sub, out var guid) ? guid : Guid.Empty;
             }
         }
 
-        public string? TenantId => User?.FindFirst("tenant_id")?.Value;
+        public Guid? TenantId
+        {
+            get
+            {
+                var val = User?.FindFirst("tenant_id")?.Value;
+                return Guid.TryParse(val, out var guid) ? guid : null;
+            }
+        }
 
         public string Role => User?.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+
+        public string Email => User?.FindFirst(ClaimTypes.Email)?.Value
+            ?? User?.FindFirst("email")?.Value
+            ?? string.Empty;
     }
 }

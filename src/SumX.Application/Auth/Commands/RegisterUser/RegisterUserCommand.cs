@@ -1,7 +1,7 @@
 using System;
 using MediatR;
 
-namespace SumX.Application.User.Command.RegisterUser
+namespace SumX.Application.Auth.Commands.RegisterUser
 {
     public sealed record RegisterUserCommand(
         string Email,

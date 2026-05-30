@@ -88,7 +88,7 @@ namespace SumX.Infrastructure.Persistence.Master.Repositories
             }
         }
 
-        public async Task AssignTenantAsync(Guid userId, string tenantId)
+        public async Task AssignTenantAsync(Guid userId, Guid tenantId)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
 
