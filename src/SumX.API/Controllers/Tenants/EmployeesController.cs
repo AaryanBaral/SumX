@@ -14,6 +14,8 @@ using SumX.Application.Employees.Queries;
 using SumX.Application.Employees.Queries.GetAllEmployees;
 using SumX.Application.Employees.Queries.GetEmployeeById;
 
+using SumX.Application.Employees.Queries.GetEmployeeByEmail;
+
 namespace SumX.API.Controllers.Tenants
 {
     [ApiController]
@@ -56,20 +58,23 @@ namespace SumX.API.Controllers.Tenants
             return Ok(deletedId);
         }
 
+        [HttpGet("me")]
+        [Authorize(Roles = "Employee")]
+        public async Task<ActionResult<EmployeeDto>> GetMe()
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? User.FindFirst("email")?.Value;
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return BadRequest("User email claim is missing.");
+            }
+            var query = new GetEmployeeByEmailQuery(userEmail);
+            var employee = await _mediator.Send(query);
+            return Ok(employee);
+        }
+
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<EmployeeDto>> GetById(Guid id)
         {
-            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value;
-
-            if (string.Equals(userRole, "Employee", StringComparison.OrdinalIgnoreCase))
-            {
-                if (!Guid.TryParse(userIdStr, out var userId) || userId != id)
-                {
-                    throw new ForbiddenException("Employees can only retrieve their own employee information.");
-                }
-            }
-
             var query = new GetEmployeeByIdQuery(id);
             var employee = await _mediator.Send(query);
             return Ok(employee);

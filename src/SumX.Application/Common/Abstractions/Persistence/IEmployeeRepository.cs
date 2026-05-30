@@ -7,6 +7,7 @@ namespace SumX.Application.Common.Abstractions.Persistence
     public interface IEmployeeRepository
     {
         Task<Employee?> GetByIdAsync(Guid id, bool trackChanges = false);
+        Task<Employee?> GetByEmailAsync(string email, bool trackChanges = false);
         Task<IEnumerable<Employee>> GetAllAsync(bool trackChanges = false);
         Task CreateAsync(Employee employee);
         Task UpdateAsync(Employee employee);

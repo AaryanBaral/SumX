@@ -22,6 +22,13 @@ namespace SumX.Infrastructure.Persistence.Tenants.Repositories
                 : await _context.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
         }
 
+        public async Task<Employee?> GetByEmailAsync(string email, bool trackChanges = false)
+        {
+            return trackChanges
+                ? await _context.Employees.FirstOrDefaultAsync(e => e.Email == email)
+                : await _context.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.Email == email);
+        }
+
         public async Task<IEnumerable<Employee>> GetAllAsync(bool trackChanges = false)
         {
             return trackChanges

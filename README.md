@@ -111,9 +111,9 @@ When a `SuperAdmin` triggers the `CreateTenantCommand`, the following orchestrat
 ## 📬 Example API Requests
 
 ### 1. Authenticate / Login
-**POST** `/api/auth/login`
+**POST** `/api/v1.0/auth/login`
 ```bash
-curl -X POST http://localhost:5000/api/auth/login \
+curl -X POST http://localhost:5000/api/v1.0/auth/login \
      -H "Content-Type: application/json" \
      -d '{
        "email": "assessment@yopmail.com",
@@ -122,9 +122,9 @@ curl -X POST http://localhost:5000/api/auth/login \
 ```
 
 ### 2. Create Tenant (SuperAdmin Only)
-**POST** `/api/tenants`
+**POST** `/api/v1.0/tenants`
 ```bash
-curl -X POST http://localhost:5000/api/tenants \
+curl -X POST http://localhost:5000/api/v1.0/tenants \
      -H "Authorization: Bearer <SUPERADMIN_JWT_TOKEN>" \
      -H "Content-Type: application/json" \
      -d '{
@@ -136,9 +136,9 @@ curl -X POST http://localhost:5000/api/tenants \
 ```
 
 ### 3. Register User (Tenant Admin Only)
-**POST** `/api/users/register`
+**POST** `/api/v1.0/users/register`
 ```bash
-curl -X POST http://localhost:5000/api/users/register \
+curl -X POST http://localhost:5000/api/v1.0/users/register \
      -H "Authorization: Bearer <TENANT_ADMIN_JWT_TOKEN>" \
      -H "Content-Type: application/json" \
      -d '{
@@ -149,9 +149,9 @@ curl -X POST http://localhost:5000/api/users/register \
 ```
 
 ### 4. Create Employee (Tenant Admin Only)
-**POST** `/api/employees`
+**POST** `/api/v1.0/employees`
 ```bash
-curl -X POST http://localhost:5000/api/employees \
+curl -X POST http://localhost:5000/api/v1.0/employees \
      -H "Authorization: Bearer <TENANT_ADMIN_JWT_TOKEN>" \
      -H "Content-Type: application/json" \
      -d '{
@@ -161,8 +161,8 @@ curl -X POST http://localhost:5000/api/employees \
 ```
 
 ### 5. Fetch My Information (Employee Only)
-**GET** `/api/employees/me`
+**GET** `/api/v1.0/employees/me`
 ```bash
-curl -X GET http://localhost:5000/api/employees/me \
+curl -X GET http://localhost:5000/api/v1.0/employees/me \
      -H "Authorization: Bearer <EMPLOYEE_JWT_TOKEN>"
 ```

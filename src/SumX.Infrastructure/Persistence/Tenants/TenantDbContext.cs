@@ -22,8 +22,17 @@ namespace SumX.Infrastructure.Persistence.Tenants
         {
             if (!optionsBuilder.IsConfigured)
             {
-                // Retrieve the connection string dynamically from the tenant provider
-                var connectionString = _tenantProvider.GetConnectionStringAsync().GetAwaiter().GetResult();
+                string connectionString;
+                try
+                {
+                    // Retrieve the connection string dynamically from the tenant provider
+                    connectionString = _tenantProvider.GetConnectionStringAsync().GetAwaiter().GetResult();
+                }
+                catch (InvalidOperationException)
+                {
+                    // Fallback connection string for EF Core CLI design-time migration generation
+                    connectionString = "Host=127.0.0.1;Port=5432;Database=sumx_tenant_design;Username=postgres;Password=postgres";
+                }
                 optionsBuilder.UseNpgsql(connectionString);
             }
             
@@ -34,14 +43,10 @@ namespace SumX.Infrastructure.Persistence.Tenants
         {
             base.OnModelCreating(modelBuilder);
             
-            modelBuilder.Entity<Employee>(builder =>
-            {
-                builder.ToTable("Employees");
-                builder.HasKey(e => e.Id);
-                builder.Property(e => e.Id).HasMaxLength(36);
-                builder.Property(e => e.FullName).IsRequired().HasMaxLength(200);
-                builder.Property(e => e.Email).IsRequired().HasMaxLength(256);
-            });
+            modelBuilder.ApplyConfigurationsFromAssembly(
+                typeof(TenantDbContext).Assembly,
+                type => type.Namespace is not null &&
+                        type.Namespace.Contains(".Persistence.Tenants.", StringComparison.Ordinal));
         }
     }
 }
