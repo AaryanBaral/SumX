@@ -5,7 +5,7 @@ using SumX.API.Models.Auth;
 using SumX.Application.Auth.Commands.LoginUser;
 using SumX.Application.Auth.DTOs;
 using SumX.Application.Auth.Commands.RegisterUser;
-using SumX.Domain.Constants;
+using SumX.Application.Common.Constants;
 
 namespace SumX.API.Controllers.Auth
 {

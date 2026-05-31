@@ -1,7 +1,7 @@
 using FluentValidation;
 using SumX.Domain.Constants;
 
-namespace SumX.Application.User.Command.UpdateUser;
+namespace SumX.Application.User.Commands.UpdateUser;
 
 public sealed class UpdateUserValidator : AbstractValidator<UpdateUserCommand>
 {

@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using SumX.Application.Auth;
 using SumX.Application.Auth.Interfaces;
 using SumX.Domain.Entities;
 using SumX.Infrastructure.Persistence.Master;
@@ -14,12 +15,12 @@ namespace SumX.Infrastructure.Auth
 {
     public class JwtTokenGenerator : IJwtTokenGenerator
     {
-        private readonly JwtOptions _jwtOptions;
+        private readonly JwtSettings _jwtSettings;
         private readonly MasterDbContext _masterDbContext;
 
-        public JwtTokenGenerator(IOptions<JwtOptions> options, MasterDbContext masterDbContext)
+        public JwtTokenGenerator(IOptions<JwtSettings> options, MasterDbContext masterDbContext)
         {
-            _jwtOptions = options.Value;
+            _jwtSettings = options.Value;
             _masterDbContext = masterDbContext;
         }
 
@@ -46,13 +47,13 @@ namespace SumX.Infrastructure.Auth
                 }
             }
 
-            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey));
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
             var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-            var expiry = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpirationMinutes);
+            var expiry = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationMinutes);
 
             var token = new JwtSecurityToken(
-                issuer: _jwtOptions.Issuer,
-                audience: _jwtOptions.Audience,
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
                 claims: claims,
                 signingCredentials: signingCredentials,
                 expires: expiry);

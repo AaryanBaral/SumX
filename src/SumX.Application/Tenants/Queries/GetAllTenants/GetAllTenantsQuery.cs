@@ -1,8 +1,7 @@
-using System.Collections.Generic;
 using SumX.Application.Common.CQRS;
-using SumX.Domain.Entities.Master;
+using SumX.Application.Tenants.DTOs;
 
 namespace SumX.Application.Tenants.Queries.GetAllTenants
 {
-    public sealed record GetAllTenantsQuery(bool TrackChanges = false) : IQuery<IEnumerable<Tenant>>;
+    public sealed record GetAllTenantsQuery(bool TrackChanges = false) : IQuery<IReadOnlyList<TenantDto>>;
 }

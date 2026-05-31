@@ -2,10 +2,10 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SumX.API.Models.User;
-using SumX.Application.User.Command.DeleteUser;
 using SumX.Application.Auth.Commands.RegisterUser;
-using SumX.Application.User.Command.UpdateUser;
-using SumX.Domain.Constants;
+using SumX.Application.Common.Constants;
+using SumX.Application.User.Commands.DeleteUser;
+using SumX.Application.User.Commands.UpdateUser;
 
 namespace SumX.API.Controllers.Users;
 

@@ -7,11 +7,12 @@ using SumX.Application.Common.Abstractions;
 using SumX.Application.Common.Abstractions.Persistence.Master;
 using SumX.Application.Common.Exceptions;
 using SumX.Domain.Constants;
-using SumX.Domain.Entities.Master;
+using SumX.Application.Tenants.DTOs;
+using SumX.Application.Tenants.Mapping;
 
 namespace SumX.Application.Tenants.Queries.GetAllTenants
 {
-    public sealed class GetAllTenantsHandler : IRequestHandler<GetAllTenantsQuery, IEnumerable<Tenant>>
+    public sealed class GetAllTenantsHandler : IRequestHandler<GetAllTenantsQuery, IReadOnlyList<TenantDto>>
     {
         private readonly ITenantRepository _tenantRepository;
         private readonly ICurrentUserContext _currentUserContext;
@@ -24,14 +25,15 @@ namespace SumX.Application.Tenants.Queries.GetAllTenants
             _currentUserContext = currentUserContext;
         }
 
-        public async Task<IEnumerable<Tenant>> Handle(GetAllTenantsQuery request, CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<TenantDto>> Handle(GetAllTenantsQuery request, CancellationToken cancellationToken)
         {
             if (!string.Equals(_currentUserContext.Role, Roles.SuperAdmin, StringComparison.Ordinal))
             {
                 throw new ForbiddenException("Only SuperAdmins are allowed to manage tenants.");
             }
 
-            return await _tenantRepository.GetAllAsync(request.TrackChanges);
+            var tenants = await _tenantRepository.GetAllAsync(request.TrackChanges);
+            return tenants.Select(t => t.ToDto()).ToList();
         }
     }
 }

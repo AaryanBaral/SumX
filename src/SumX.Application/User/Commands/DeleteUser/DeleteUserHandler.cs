@@ -4,7 +4,7 @@ using SumX.Application.Common.Exceptions;
 using SumX.Application.User.Interface;
 using SumX.Domain.Constants;
 
-namespace SumX.Application.User.Command.DeleteUser;
+namespace SumX.Application.User.Commands.DeleteUser;
 
 public sealed class DeleteUserHandler : IRequestHandler<DeleteUserCommand, Guid>
 {

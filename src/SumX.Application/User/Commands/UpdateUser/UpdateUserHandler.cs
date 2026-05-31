@@ -1,10 +1,11 @@
+using FluentValidation.Results;
 using MediatR;
 using SumX.Application.Common.Abstractions;
 using SumX.Application.Common.Exceptions;
 using SumX.Application.User.Interface;
 using SumX.Domain.Constants;
 
-namespace SumX.Application.User.Command.UpdateUser;
+namespace SumX.Application.User.Commands.UpdateUser;
 
 public sealed class UpdateUserHandler : IRequestHandler<UpdateUserCommand, Guid>
 {
@@ -49,7 +50,7 @@ public sealed class UpdateUserHandler : IRequestHandler<UpdateUserCommand, Guid>
             throw new AppValidationException(
                 new[]
                 {
-                    new FluentValidation.Results.ValidationFailure(
+                    new ValidationFailure(
                         nameof(UpdateUserCommand.Email),
                         $"Email address '{request.Email}' is already registered.")
                 });

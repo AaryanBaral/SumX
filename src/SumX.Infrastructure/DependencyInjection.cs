@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SumX.Application.Auth;
 using SumX.Application.Auth.Interfaces;
 using SumX.Application.Common.Abstractions;
 using SumX.Application.Common.Abstractions.Persistence;
@@ -11,6 +12,7 @@ using SumX.Infrastructure.Auth;
 using SumX.Infrastructure.Persistence.Master;
 using SumX.Infrastructure.Persistence.Master.Identity;
 using SumX.Infrastructure.Persistence.Master.Repositories;
+using SumX.Infrastructure.Persistence.Master.Seed;
 using SumX.Infrastructure.Persistence.Tenants;
 using SumX.Infrastructure.Persistence.Tenants.Repositories;
 
@@ -37,8 +39,10 @@ public static class DependencyInjection
         })
         .AddRoles<IdentityRole<Guid>>()
         .AddEntityFrameworkStores<MasterDbContext>();
-        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IMasterDbSeeder, MasterDbSeederService>();
+        services.AddScoped<IMasterDatabaseMigrator, MasterDatabaseMigrator>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();

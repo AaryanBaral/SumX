@@ -6,11 +6,12 @@ using SumX.Application.Common.Abstractions;
 using SumX.Application.Common.Abstractions.Persistence.Master;
 using SumX.Application.Common.Exceptions;
 using SumX.Domain.Constants;
-using SumX.Domain.Entities.Master;
+using SumX.Application.Tenants.DTOs;
+using SumX.Application.Tenants.Mapping;
 
 namespace SumX.Application.Tenants.Queries.GetTenantById
 {
-    public sealed class GetTenantByIdHandler : IRequestHandler<GetTenantByIdQuery, Tenant?>
+    public sealed class GetTenantByIdHandler : IRequestHandler<GetTenantByIdQuery, TenantDto>
     {
         private readonly ITenantRepository _tenantRepository;
         private readonly ICurrentUserContext _currentUserContext;
@@ -23,7 +24,7 @@ namespace SumX.Application.Tenants.Queries.GetTenantById
             _currentUserContext = currentUserContext;
         }
 
-        public async Task<Tenant?> Handle(GetTenantByIdQuery request, CancellationToken cancellationToken)
+        public async Task<TenantDto> Handle(GetTenantByIdQuery request, CancellationToken cancellationToken)
         {
             if (!string.Equals(_currentUserContext.Role, Roles.SuperAdmin, StringComparison.Ordinal))
             {
@@ -36,7 +37,7 @@ namespace SumX.Application.Tenants.Queries.GetTenantById
                 throw new NotFoundException("Tenant not found.");
             }
 
-            return tenant;
+            return tenant.ToDto();
         }
     }
 }

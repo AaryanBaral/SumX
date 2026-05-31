@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace SumX.Application.User.Command.DeleteUser;
+namespace SumX.Application.User.Commands.DeleteUser;
 
 public sealed class DeleteUserValidator : AbstractValidator<DeleteUserCommand>
 {

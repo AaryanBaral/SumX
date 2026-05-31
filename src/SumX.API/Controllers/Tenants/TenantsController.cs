@@ -8,10 +8,10 @@ using SumX.API.Models.Tenant;
 using SumX.Application.Tenants.Commands.CreateTenant;
 using SumX.Application.Tenants.Commands.DeleteTenant;
 using SumX.Application.Tenants.Commands.UpdateTenant;
+using SumX.Application.Common.Constants;
+using SumX.Application.Tenants.DTOs;
 using SumX.Application.Tenants.Queries.GetAllTenants;
 using SumX.Application.Tenants.Queries.GetTenantById;
-using SumX.Domain.Constants;
-using SumX.Domain.Entities.Master;
 
 namespace SumX.API.Controllers.Tenants
 {
@@ -64,7 +64,7 @@ namespace SumX.API.Controllers.Tenants
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<Tenant>> GetById(Guid id)
+        public async Task<ActionResult<TenantDto>> GetById(Guid id)
         {
             var query = new GetTenantByIdQuery(id);
             var tenant = await _mediator.Send(query);
@@ -72,7 +72,7 @@ namespace SumX.API.Controllers.Tenants
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tenant>>> GetAll()
+        public async Task<ActionResult<IReadOnlyList<TenantDto>>> GetAll()
         {
             var query = new GetAllTenantsQuery();
             var tenants = await _mediator.Send(query);

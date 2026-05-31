@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace SumX.Application.User.Command.UpdateUser;
+namespace SumX.Application.User.Commands.UpdateUser;
 
 public sealed record UpdateUserCommand(
     Guid Id,
