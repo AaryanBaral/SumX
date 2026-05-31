@@ -31,20 +31,14 @@ public sealed class UsersController : ControllerBase
             request.Role);
 
         var userId = await _mediator.Send(command);
-
         return Ok(userId);
     }
 
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<Guid>> Update(Guid id, UpdateUserRequest request)
     {
-        var command = new UpdateUserCommand(
-            id,
-            request.Email,
-            request.Role);
-
+        var command = new UpdateUserCommand(id, request.Email, request.Role);
         var userId = await _mediator.Send(command);
-
         return Ok(userId);
     }
 
@@ -53,7 +47,6 @@ public sealed class UsersController : ControllerBase
     {
         var command = new DeleteUserCommand(id);
         var userId = await _mediator.Send(command);
-
         return Ok(userId);
     }
 }
