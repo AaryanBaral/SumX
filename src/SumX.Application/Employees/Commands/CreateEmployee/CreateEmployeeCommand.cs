@@ -1,4 +1,4 @@
-using SumX.Application.Common.CQRS;
+using SumX.Application.Common.Abstractions.CQRS;
 
 namespace SumX.Application.Employees.Commands.CreateEmployee
 {

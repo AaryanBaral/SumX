@@ -1,4 +1,5 @@
 using SumX.Application.Common.Abstractions;
+using SumX.Application.Common.Abstractions.MultiTenancy;
 using SumX.Application.Tenants.DTOs;
 using SumX.Domain.Entities.Master;
 

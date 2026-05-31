@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using SumX.Application.Common.Abstractions;
+using SumX.Application.Common.Abstractions.MultiTenancy;
 
 namespace SumX.Infrastructure.Persistence.Tenants.Services;
 

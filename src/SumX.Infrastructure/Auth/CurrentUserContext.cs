@@ -2,6 +2,7 @@ using System;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using SumX.Application.Common.Abstractions;
+using SumX.Application.Common.Abstractions.Security;
 
 namespace SumX.Infrastructure.Auth
 {

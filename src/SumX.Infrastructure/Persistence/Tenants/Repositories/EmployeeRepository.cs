@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using SumX.Application.Common.Abstractions.Persistence;
+using SumX.Application.Common.Abstractions.Persistence.Tenants;
 using SumX.Domain.Entities.Tenants;
 
 namespace SumX.Infrastructure.Persistence.Tenants.Repositories

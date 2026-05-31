@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SumX.Application.Common.Exceptions;
-using SumX.Application.User.Interface;
+using SumX.Application.Common.Abstractions.Persistence.Tenants;
 using SumX.Domain.Entities;
 using SumX.Infrastructure.Persistence.Master.Identity;
 using SumX.Infrastructure.Persistence.Master.Mapper;
@@ -24,6 +24,15 @@ namespace SumX.Infrastructure.Persistence.Master.Repositories
             return user is null
                 ? null
                 : ApplicationUserMapper.ToDomain(user);
+        }
+
+        public async Task<IReadOnlyList<ApplicationUser>> GetByTenantIdAsync(Guid tenantId)
+        {
+            var users = await _userManager.Users
+                .Where(u => u.TenantId == tenantId)
+                .ToListAsync();
+
+            return users.Select(ApplicationUserMapper.ToDomain).ToList();
         }
 
         public async Task<ApplicationUser?> GetByEmailAsync(string email)

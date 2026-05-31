@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using SumX.Application.Common.Abstractions;
+using SumX.Application.Common.Abstractions.MultiTenancy;
 
 namespace SumX.API.Middlewares
 {

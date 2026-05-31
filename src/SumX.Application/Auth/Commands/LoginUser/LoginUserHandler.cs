@@ -1,12 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using SumX.Application.Auth.DTOs;
-using SumX.Application.Auth.Interfaces;
+using SumX.Application.Common.Abstractions.Security;
+using SumX.Application.Auth.Mapping;
 using SumX.Application.Common.Exceptions;
-using SumX.Application.User.Interface;
+using SumX.Application.Common.Abstractions.Persistence.Tenants;
 
 namespace SumX.Application.Auth.Commands.LoginUser
 {
@@ -38,14 +37,7 @@ namespace SumX.Application.Auth.Commands.LoginUser
 
             var token = await _jwtTokenGenerator.GenerateTokenAsync(user, cancellationToken);
 
-            return new AuthResult
-            {
-                AccessToken = token,
-                UserId = user.Id,
-                Email = user.Email,
-                Role = user.Role,
-                TenantId = user.TenantId
-            };
+            return user.ToAuthResult(token);
         }
     }
 }

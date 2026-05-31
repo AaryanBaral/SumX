@@ -4,6 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using SumX.Application.Common.Abstractions;
+using SumX.Application.Common.Abstractions.MultiTenancy;
+using SumX.Application.Common.Abstractions.Security;
 using SumX.Application.Common.Abstractions.Persistence.Master;
 using SumX.Application.Common.Exceptions;
 using SumX.Domain.Constants;

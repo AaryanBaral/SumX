@@ -3,7 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using SumX.Application.Common.Abstractions;
-using SumX.Application.Common.Abstractions.Persistence;
+using SumX.Application.Common.Abstractions.Security;
+using SumX.Application.Common.Abstractions.Persistence.Tenants;
 using SumX.Application.Common.Exceptions;
 
 namespace SumX.Application.Employees.Commands.UpdateEmployee
@@ -21,7 +22,6 @@ namespace SumX.Application.Employees.Commands.UpdateEmployee
 
         public async Task<Guid> Handle(UpdateEmployeeCommand request, CancellationToken cancellationToken)
         {
-            // Only Admin role can update employees
             if (!string.Equals(_currentUserContext.Role, "Admin", StringComparison.OrdinalIgnoreCase))
             {
                 throw new ForbiddenException("Only Admins can update employees.");

@@ -5,8 +5,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using SumX.Application.Common.Abstractions;
-using SumX.Application.Common.Abstractions.Persistence;
+using SumX.Application.Common.Abstractions.Security;
+using SumX.Application.Common.Abstractions.Persistence.Tenants;
 using SumX.Application.Common.Exceptions;
+using SumX.Application.Employees.DTOs;
+using SumX.Application.Employees.Mapping;
 
 namespace SumX.Application.Employees.Queries.GetAllEmployees
 {
@@ -23,7 +26,6 @@ namespace SumX.Application.Employees.Queries.GetAllEmployees
 
         public async Task<IEnumerable<EmployeeDto>> Handle(GetAllEmployeesQuery request, CancellationToken cancellationToken)
         {
-            // Only Admin role can view all employees
             if (!string.Equals(_currentUserContext.Role, "Admin", StringComparison.OrdinalIgnoreCase))
             {
                 throw new ForbiddenException("Only Admins can list all employees.");
@@ -31,7 +33,7 @@ namespace SumX.Application.Employees.Queries.GetAllEmployees
 
             var employees = await _employeeRepository.GetAllAsync(trackChanges: false);
 
-            return employees.Select(e => new EmployeeDto(e.Id, e.FullName, e.Email));
+            return employees.Select(e => e.ToDto());
         }
     }
 }

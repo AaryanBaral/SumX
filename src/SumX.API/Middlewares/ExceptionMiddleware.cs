@@ -1,7 +1,14 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using FluentValidation;
 using SumX.API.Common;
 using SumX.Application.Common.Exceptions;
 using SumX.Domain.Exceptions;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SumX.API.Middlewares;
 
@@ -47,11 +54,35 @@ public sealed class ExceptionMiddleware
         }
 
         context.Response.StatusCode = statusCode;
-        context.Response.ContentType = "application/json";
+        context.Response.ContentType = "application/problem+json";
 
-        var response = ApiResponse<object>.Fail(message, statusCode, errors);
-        await context.Response.WriteAsJsonAsync(response);
+        var problemDetails = new ProblemDetails
+        {
+            Status = statusCode,
+            Title = GetTitle(statusCode),
+            Detail = message,
+            Instance = context.Request.Path
+        };
+
+        problemDetails.Extensions["traceId"] = context.TraceIdentifier;
+
+        if (errors is not null)
+        {
+            problemDetails.Extensions["errors"] = errors;
+        }
+
+        await context.Response.WriteAsJsonAsync(problemDetails);
     }
+
+    private static string GetTitle(int statusCode) =>
+        statusCode switch
+        {
+            StatusCodes.Status400BadRequest => "Bad Request",
+            StatusCodes.Status401Unauthorized => "Unauthorized",
+            StatusCodes.Status403Forbidden => "Forbidden",
+            StatusCodes.Status404NotFound => "Not Found",
+            _ => "Internal Server Error"
+        };
 
     private static (int StatusCode, string Message, object? Errors) MapException(Exception exception) =>
         exception switch

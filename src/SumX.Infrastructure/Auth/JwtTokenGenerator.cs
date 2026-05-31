@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SumX.Application.Auth;
-using SumX.Application.Auth.Interfaces;
+using SumX.Application.Common.Abstractions.Security;
 using SumX.Application.Common.Abstractions.Persistence.Master;
 using SumX.Domain.Entities;
 

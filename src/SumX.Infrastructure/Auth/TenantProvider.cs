@@ -2,6 +2,8 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SumX.Application.Common.Abstractions;
+using SumX.Application.Common.Abstractions.MultiTenancy;
+using SumX.Application.Common.Abstractions.Security;
 using SumX.Infrastructure.Persistence.Master;
 
 namespace SumX.Infrastructure.Auth

@@ -1,6 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using SumX.Application.Common.Abstractions;
+using SumX.Application.Common.Abstractions.MultiTenancy;
 using SumX.Domain.Entities.Tenants;
 
 namespace SumX.Infrastructure.Persistence.Tenants

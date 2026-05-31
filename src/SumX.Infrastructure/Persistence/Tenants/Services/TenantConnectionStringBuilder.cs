@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using SumX.Application.Common.Abstractions;
+using SumX.Application.Common.Abstractions.MultiTenancy;
 
 namespace SumX.Infrastructure.Persistence.Tenants.Services;
 

@@ -3,8 +3,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using SumX.Application.Common.Abstractions;
-using SumX.Application.Common.Abstractions.Persistence;
+using SumX.Application.Common.Abstractions.Security;
+using SumX.Application.Common.Abstractions.Persistence.Tenants;
 using SumX.Application.Common.Exceptions;
+using SumX.Application.Employees.DTOs;
+using SumX.Application.Employees.Mapping;
 
 namespace SumX.Application.Employees.Queries.GetEmployeeByEmail
 {
@@ -23,14 +26,12 @@ namespace SumX.Application.Employees.Queries.GetEmployeeByEmail
         {
             var role = _currentUserContext.Role;
 
-            // Enforce role checks: Admin or Employee only
             if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(role, "Employee", StringComparison.OrdinalIgnoreCase))
             {
                 throw new ForbiddenException("You are not authorized to view employee details.");
             }
 
-            // If user is an Employee, they can only retrieve their own record (emails must match)
             if (string.Equals(role, "Employee", StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(request.Email, _currentUserContext.Email, StringComparison.OrdinalIgnoreCase))
             {
@@ -43,7 +44,7 @@ namespace SumX.Application.Employees.Queries.GetEmployeeByEmail
                 throw new NotFoundException($"Employee with email '{request.Email}' was not found.");
             }
 
-            return new EmployeeDto(employee.Id, employee.FullName, employee.Email);
+            return employee.ToDto();
         }
     }
 }

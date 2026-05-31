@@ -3,8 +3,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using SumX.Application.Common.Abstractions;
-using SumX.Application.Common.Abstractions.Persistence;
+using SumX.Application.Common.Abstractions.Security;
+using SumX.Application.Common.Abstractions.Persistence.Tenants;
 using SumX.Application.Common.Exceptions;
+using SumX.Application.Employees.DTOs;
+using SumX.Application.Employees.Mapping;
 
 namespace SumX.Application.Employees.Queries.GetEmployeeById
 {
@@ -23,7 +26,6 @@ namespace SumX.Application.Employees.Queries.GetEmployeeById
         {
             var role = _currentUserContext.Role;
 
-            // Enforce role checks: Admin or Employee only
             if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(role, "Employee", StringComparison.OrdinalIgnoreCase))
             {
@@ -36,14 +38,13 @@ namespace SumX.Application.Employees.Queries.GetEmployeeById
                 throw new NotFoundException($"Employee with ID '{request.Id}' was not found.");
             }
 
-            // If user is an Employee, they can only retrieve their own record (emails must match)
             if (string.Equals(role, "Employee", StringComparison.OrdinalIgnoreCase) && 
                 !string.Equals(employee.Email, _currentUserContext.Email, StringComparison.OrdinalIgnoreCase))
             {
                 throw new ForbiddenException("Employees can only retrieve their own employee information.");
             }
 
-            return new EmployeeDto(employee.Id, employee.FullName, employee.Email);
+            return employee.ToDto();
         }
     }
 }

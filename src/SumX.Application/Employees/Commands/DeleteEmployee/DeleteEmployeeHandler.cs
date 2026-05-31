@@ -3,7 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using SumX.Application.Common.Abstractions;
-using SumX.Application.Common.Abstractions.Persistence;
+using SumX.Application.Common.Abstractions.Security;
+using SumX.Application.Common.Abstractions.Persistence.Tenants;
 using SumX.Application.Common.Exceptions;
 
 namespace SumX.Application.Employees.Commands.DeleteEmployee
@@ -21,7 +22,6 @@ namespace SumX.Application.Employees.Commands.DeleteEmployee
 
         public async Task<Guid> Handle(DeleteEmployeeCommand request, CancellationToken cancellationToken)
         {
-            // Only Admin role can delete employees
             if (!string.Equals(_currentUserContext.Role, "Admin", StringComparison.OrdinalIgnoreCase))
             {
                 throw new ForbiddenException("Only Admins can delete employees.");

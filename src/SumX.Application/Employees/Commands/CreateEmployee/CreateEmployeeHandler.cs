@@ -3,7 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using SumX.Application.Common.Abstractions;
-using SumX.Application.Common.Abstractions.Persistence;
+using SumX.Application.Common.Abstractions.Security;
+using SumX.Application.Common.Abstractions.Persistence.Tenants;
 using SumX.Application.Common.Exceptions;
 using SumX.Domain.Entities.Tenants;
 
@@ -22,7 +23,6 @@ namespace SumX.Application.Employees.Commands.CreateEmployee
 
         public async Task<Guid> Handle(CreateEmployeeCommand request, CancellationToken cancellationToken)
         {
-            // Only Admin role can create employees
             if (!string.Equals(_currentUserContext.Role, "Admin", StringComparison.OrdinalIgnoreCase))
             {
                 throw new ForbiddenException("Only Admins can create employees.");

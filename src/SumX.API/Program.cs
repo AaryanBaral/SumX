@@ -3,7 +3,7 @@ using SumX.API.Extensions;
 using SumX.API.Middlewares;
 using SumX.Application.Common.Abstractions;
 using SumX.Application.Common.Constants;
-using SumX.Infrastructure;
+using SumX.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +65,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<TransactionMiddleware>();
 app.UseAuthentication();
 app.UseMiddleware<TenantResolutionMiddleware>();
 app.UseAuthorization();
