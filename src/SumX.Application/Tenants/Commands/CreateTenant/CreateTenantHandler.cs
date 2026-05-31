@@ -60,31 +60,44 @@ namespace SumX.Application.Tenants.Commands.CreateTenant
                     });
             }
 
-            // 1. Setup Tenant Database dynamically
             await _tenantDatabaseService.CreateTenantDatabaseAsync(request.DatabaseConnectionString);
 
-            // 2. Create the Tenant Entity
-            var tenantId = Guid.NewGuid();
-            var tenant = Tenant.Create(
-                tenantId,
-                request.Name,
-                request.Email,
-                normalizedCode,
-                request.DatabaseConnectionString);
+            Guid? persistedTenantId = null;
 
-            await _tenantRepository.CreateAsync(tenant);
+            try
+            {
+                var tenantId = Guid.NewGuid();
+                var tenant = Tenant.Create(
+                    tenantId,
+                    request.Name,
+                    request.Email,
+                    normalizedCode,
+                    request.DatabaseConnectionString);
 
-            // 3. Create Default Admin user for that tenant
-            var adminUser = ApplicationUser.CreateTenantUser(
-                id: Guid.NewGuid(),
-                emailAddress: request.Email,
-                tenantId: tenantId,
-                role: Roles.Admin);
+                await _tenantRepository.CreateAsync(tenant);
+                persistedTenantId = tenantId;
 
-            var userId = await _userRepository.CreateAsync(adminUser, request.AdminPassword);
-            await _userRepository.AssignRoleAsync(userId, Roles.Admin);
+                var adminUser = ApplicationUser.CreateTenantUser(
+                    id: Guid.NewGuid(),
+                    emailAddress: request.Email,
+                    tenantId: tenantId,
+                    role: Roles.Admin);
 
-            return tenantId;
+                var userId = await _userRepository.CreateAsync(adminUser, request.AdminPassword);
+                await _userRepository.AssignRoleAsync(userId, Roles.Admin);
+
+                return tenantId;
+            }
+            catch
+            {
+                if (persistedTenantId.HasValue)
+                {
+                    await _tenantRepository.DeleteAsync(persistedTenantId.Value);
+                }
+
+                await _tenantDatabaseService.DeleteTenantDatabaseAsync(request.DatabaseConnectionString);
+                throw;
+            }
         }
     }
 }

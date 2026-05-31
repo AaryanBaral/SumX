@@ -5,5 +5,7 @@ namespace SumX.Application.Common.Abstractions
     public interface ITenantDatabaseService
     {
         Task CreateTenantDatabaseAsync(string connectionString);
+
+        Task DeleteTenantDatabaseAsync(string connectionString);
     }
 }

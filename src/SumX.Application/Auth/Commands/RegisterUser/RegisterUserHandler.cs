@@ -4,23 +4,28 @@ using System.Threading.Tasks;
 using FluentValidation.Results;
 using MediatR;
 using SumX.Application.Common.Abstractions;
+using SumX.Application.Common.Abstractions.Persistence;
 using SumX.Application.Common.Exceptions;
 using SumX.Application.User.Interface;
 using SumX.Domain.Constants;
 using SumX.Domain.Entities;
+using SumX.Domain.Entities.Tenants;
 
 namespace SumX.Application.Auth.Commands.RegisterUser
 {
     public sealed class RegisterUserHandler : IRequestHandler<RegisterUserCommand, Guid>
     {
         private readonly IUserRepository _userRepository;
+        private readonly IEmployeeRepository _employeeRepository;
         private readonly ICurrentUserContext _currentUserContext;
 
         public RegisterUserHandler(
             IUserRepository userRepository,
+            IEmployeeRepository employeeRepository,
             ICurrentUserContext currentUserContext)
         {
             _userRepository = userRepository;
+            _employeeRepository = employeeRepository;
             _currentUserContext = currentUserContext;
         }
 
@@ -58,6 +63,17 @@ namespace SumX.Application.Auth.Commands.RegisterUser
             var userId = await _userRepository.CreateAsync(newUser, request.Password);
 
             await _userRepository.AssignRoleAsync(userId, request.Role);
+
+            if (string.Equals(request.Role, Roles.Employee, StringComparison.Ordinal))
+            {
+                var existingEmployee = await _employeeRepository.GetByEmailAsync(request.Email);
+                if (existingEmployee is null)
+                {
+                    var displayName = request.Email.Split('@')[0];
+                    var employee = Employee.Create(Guid.NewGuid(), displayName, request.Email);
+                    await _employeeRepository.CreateAsync(employee);
+                }
+            }
 
             return userId;
         }

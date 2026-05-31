@@ -27,6 +27,16 @@ namespace SumX.Infrastructure.Persistence.Tenants.Services
             await context.Database.MigrateAsync();
         }
 
+        public async Task DeleteTenantDatabaseAsync(string connectionString)
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<TenantDbContext>();
+            optionsBuilder.UseNpgsql(connectionString);
+
+            var dummyProvider = new DummyTenantProvider(connectionString);
+            await using var context = new TenantDbContext(optionsBuilder.Options, dummyProvider);
+            await context.Database.EnsureDeletedAsync();
+        }
+
         private class DummyTenantProvider : ITenantProvider
         {
             private readonly string _connectionString;

@@ -63,22 +63,14 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        var conn = builder.Configuration.GetConnectionString("DefaultConnection");
-
-        Console.WriteLine($"DB CONNECTION => {conn}");
-        var dbContext = scope.ServiceProvider
-            .GetRequiredService<MasterDbContext>();
-        await dbContext.Database.OpenConnectionAsync();
-        await dbContext.Database.CloseConnectionAsync();
-        Console.WriteLine("✅ DB RAW CONNECTION SUCCESS");
+        var dbContext = scope.ServiceProvider.GetRequiredService<MasterDbContext>();
+        await dbContext.Database.MigrateAsync();
+        logger.LogInformation("Master database migrations applied successfully.");
     }
     catch (Exception ex)
     {
-        Console.WriteLine("❌ ERROR WHILE CONNECTING DB:");
-        Console.WriteLine(ex.ToString());
-
-        logger.LogError(ex, "❌ Error while connecting to database.");
-        logger.LogError(ex, "❌ Error while connecting to database.");
+        logger.LogError(ex, "Failed to apply master database migrations.");
+        throw;
     }
 }
 // Configure the HTTP request pipeline.

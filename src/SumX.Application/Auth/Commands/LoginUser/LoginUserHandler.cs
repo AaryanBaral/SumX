@@ -30,7 +30,7 @@ namespace SumX.Application.Auth.Commands.LoginUser
                 request.Password);
 
             if (!isValid)
-                throw new UnauthorizedAccessException("Invalid credentials");
+                throw new UnauthorizedException("Invalid credentials");
 
             var user = await _userRepository.GetByEmailAsync(request.Email);
 

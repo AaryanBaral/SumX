@@ -57,19 +57,19 @@ A default global system administrator can be seeded to bootstrap tenant creation
 *   [PostgreSQL Database Server](https://www.postgresql.org/download/)
 
 ### 2. Configure Database Connections
-Update the connection string in the `src/SumX.API/appsettings.json` file to point to your PostgreSQL instance:
+Update the connection string in `src/SumX.API/appsettings.json` to point to your PostgreSQL instance:
 ```json
 {
   "ConnectionStrings": {
-    "MasterDb": "Host=127.0.0.1;Port=5432;Database=sumx_master;Username=postgres;Password=yourpassword"
+    "MasterDb": "Host=127.0.0.1;Port=5432;Database=master_db;Username=postgres;Password=postgres"
   }
 }
 ```
 
-### 3. Run EF Core Migrations for the Master Database
-Apply the initial migration to create the master database structure (Tenants & Identity tables):
+### 3. Run EF Core Migrations for the Master Database (optional)
+Migrations are applied automatically on startup via `Database.MigrateAsync()`. To apply them manually instead:
 ```bash
-dotnet ef database update --project src/SumX.Infrastructure --startup-project src/SumX.API
+dotnet ef database update --project src/SumX.Infrastructure --startup-project src/SumX.API --context MasterDbContext
 ```
 
 ### 4. Seed the SuperAdmin User
@@ -83,37 +83,73 @@ Launch the development server:
 ```bash
 dotnet run --project src/SumX.API
 ```
-Once running, you can access the Swagger UI interface at: `http://localhost:5000/swagger` or `https://localhost:5001/swagger`.
+Once running, access Swagger at:
+*   **HTTP**: `http://localhost:5290/swagger`
+*   **HTTPS**: `https://localhost:7101/swagger`
+
+(Ports come from `src/SumX.API/Properties/launchSettings.json`.)
 
 ---
 
 ## 🔄 Tenant Database Creation Flow
 
-When a `SuperAdmin` triggers the `CreateTenantCommand`, the following orchestrations occur automatically:
+When a `SuperAdmin` triggers `CreateTenantCommand`, the following orchestration runs automatically:
 
 ```
 [SuperAdmin JWT] ──> CreateTenant API ──> CreateTenantCommandHandler
                                                       │
-                                                      ├──> 1. Store Tenant metadata & DbConnStr in MasterDb
+                                                      ├──> 1. Provision tenant DB (MigrateAsync)
                                                       │
-                                                      ├──> 2. Create Dynamic Tenant DB programmatically
-                                                      │    (Run tenantDbContext.Database.MigrateAsync())
+                                                      ├──> 2. Store tenant metadata in MasterDb
                                                       │
-                                                      └──> 3. Create Tenant Default Admin User in MasterDb
+                                                      └──> 3. Create tenant Admin user in MasterDb
 ```
 
-1.  **Metadata Persistence**: Tenant properties (ID, name, email, unique 4-character tenant code, and dynamic connection string) are stored in the `Tenants` table of the Master Database.
-2.  **Database Provisioning**: The system initializes a dynamic instance of `TenantDbContext` pointing to the newly generated database connection string and programmatically applies EF Core migrations (`Database.MigrateAsync()`) to create the isolated `Employees` table.
-3.  **Tenant Admin Creation**: An ASP.NET Core Identity user is created in the Master Database, marked with the corresponding `TenantId` and assigned the `Admin` role.
+1.  **Database Provisioning**: A `TenantDbContext` is created for the supplied connection string and EF Core migrations are applied (`MigrateAsync()`).
+2.  **Metadata Persistence**: Tenant properties (ID, name, email, unique 4-character tenant code, connection string) are stored in the Master database `Tenants` table.
+3.  **Tenant Admin Creation**: An Identity user is created in the Master database with the tenant `TenantId` and `Admin` role.
+
+If step 2 or 3 fails after the tenant database was provisioned, the handler rolls back by deleting any persisted tenant row from the Master database and dropping the tenant database (`EnsureDeletedAsync`).
+
+---
+
+## 👤 Employee Users: Registration and Tenant Data
+
+Employees exist in two places:
+
+| Store | Purpose |
+|-------|---------|
+| **Master DB** (`ApplicationUser`) | Login, JWT, `tenant_id` claim |
+| **Tenant DB** (`Employees`) | Profile used by `/employees/me` and admin employee APIs |
+
+### Automatic provisioning (default)
+
+When a tenant **Admin** registers a user with role `Employee` via `POST /api/v1.0/users/register` (or `POST /api/v1.0/auth/register`), the API also creates a matching row in the tenant `Employees` table (display name defaults to the email local-part; email matches the registered address). No separate create-employee call is required for basic login and `/employees/me`.
+
+### Manual two-step flow (optional)
+
+You can still manage employees explicitly:
+
+1. **Register** the Identity user (`role`: `Employee`).
+2. **Create employee** with `POST /api/v1.0/employees` if you need a custom `fullName` or registered the user before auto-provisioning existed.
+
+Admins registering with role `Admin` only create a Master DB user (no `Employees` row).
 
 ---
 
 ## 📬 Example API Requests
 
+Base URL (development): `http://localhost:5290` or `https://localhost:7101`
+
+JSON property names match the API request models (camelCase in JSON).
+
 ### 1. Authenticate / Login
 **POST** `/api/v1.0/auth/login`
+
+Invalid credentials return **401 Unauthorized**.
+
 ```bash
-curl -X POST http://localhost:5000/api/v1.0/auth/login \
+curl -X POST http://localhost:5290/api/v1.0/auth/login \
      -H "Content-Type: application/json" \
      -d '{
        "email": "assessment@yopmail.com",
@@ -123,22 +159,29 @@ curl -X POST http://localhost:5000/api/v1.0/auth/login \
 
 ### 2. Create Tenant (SuperAdmin Only)
 **POST** `/api/v1.0/tenants`
+
+Required fields: `name`, `email`, `tenantId` (exactly 4 characters), `databaseConnectionString`, `adminPassword` (min 6 characters).
+
 ```bash
-curl -X POST http://localhost:5000/api/v1.0/tenants \
+curl -X POST http://localhost:5290/api/v1.0/tenants \
      -H "Authorization: Bearer <SUPERADMIN_JWT_TOKEN>" \
      -H "Content-Type: application/json" \
      -d '{
        "name": "Acme Corporation",
        "email": "admin@acme.com",
        "tenantId": "ACME",
-       "dbConnStr": "Host=127.0.0.1;Port=5432;Database=sumx_tenant_acme;Username=postgres;Password=postgres"
+       "databaseConnectionString": "Host=127.0.0.1;Port=5432;Database=sumx_tenant_acme;Username=postgres;Password=postgres",
+       "adminPassword": "Admin@123"
      }'
 ```
 
 ### 3. Register User (Tenant Admin Only)
 **POST** `/api/v1.0/users/register`
+
+Password must meet complexity rules (uppercase, lowercase, digit, non-alphanumeric). `role` must be `Admin` or `Employee`.
+
 ```bash
-curl -X POST http://localhost:5000/api/v1.0/users/register \
+curl -X POST http://localhost:5290/api/v1.0/users/register \
      -H "Authorization: Bearer <TENANT_ADMIN_JWT_TOKEN>" \
      -H "Content-Type: application/json" \
      -d '{
@@ -148,21 +191,27 @@ curl -X POST http://localhost:5000/api/v1.0/users/register \
      }'
 ```
 
-### 4. Create Employee (Tenant Admin Only)
+The same endpoint is available at **POST** `/api/v1.0/auth/register` (also Admin-only).
+
+### 4. Create Employee (Tenant Admin Only, optional)
 **POST** `/api/v1.0/employees`
+
+Use when you need an explicit `fullName` or did not register via the Employee auto-provisioning path.
+
 ```bash
-curl -X POST http://localhost:5000/api/v1.0/employees \
+curl -X POST http://localhost:5290/api/v1.0/employees \
      -H "Authorization: Bearer <TENANT_ADMIN_JWT_TOKEN>" \
      -H "Content-Type: application/json" \
      -d '{
        "fullName": "John Doe",
-       "emailAddress": "employee1@acme.com"
+       "email": "employee1@acme.com"
      }'
 ```
 
 ### 5. Fetch My Information (Employee Only)
 **GET** `/api/v1.0/employees/me`
+
 ```bash
-curl -X GET http://localhost:5000/api/v1.0/employees/me \
+curl -X GET http://localhost:5290/api/v1.0/employees/me \
      -H "Authorization: Bearer <EMPLOYEE_JWT_TOKEN>"
 ```
