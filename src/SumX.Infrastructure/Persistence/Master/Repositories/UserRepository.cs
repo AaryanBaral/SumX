@@ -63,7 +63,7 @@ namespace SumX.Infrastructure.Persistence.Master.Repositories
             var user = await _userManager.FindByIdAsync(userId.ToString());
 
             if (user is null)
-                throw new Exception("User not found");
+                throw new NotFoundException("User not found");
 
             user.Role = role;
 
@@ -94,7 +94,7 @@ namespace SumX.Infrastructure.Persistence.Master.Repositories
             var user = await _userManager.FindByIdAsync(userId.ToString());
 
             if (user is null)
-                throw new Exception("User not found");
+                throw new NotFoundException("User not found");
 
             user.TenantId = tenantId;
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -8,9 +8,11 @@ namespace SumX.Infrastructure.Migrations
     /// <inheritdoc />
     public partial class UpdateUserTenantIdToGuid : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql(@"ALTER TABLE ""Users"" ALTER COLUMN ""TenantId"" TYPE uuid USING ""TenantId""::uuid;");
+            migrationBuilder.Sql(@"ALTER TABLE ""Tenants"" ALTER COLUMN ""Id"" TYPE uuid USING ""Id""::uuid;");
+
             migrationBuilder.AlterColumn<Guid>(
                 name: "TenantId",
                 table: "Users",
@@ -34,6 +36,9 @@ namespace SumX.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql(@"ALTER TABLE ""Users"" ALTER COLUMN ""TenantId"" TYPE varchar(36) USING ""TenantId""::varchar(36);");
+            migrationBuilder.Sql(@"ALTER TABLE ""Tenants"" ALTER COLUMN ""Id"" TYPE varchar(36) USING ""Id""::varchar(36);");
+
             migrationBuilder.AlterColumn<string>(
                 name: "TenantId",
                 table: "Users",

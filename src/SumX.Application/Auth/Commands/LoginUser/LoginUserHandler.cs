@@ -25,17 +25,16 @@ namespace SumX.Application.Auth.Commands.LoginUser
 
         public async Task<AuthResult> Handle(LoginUserCommand request, CancellationToken cancellationToken)
         {
+            var user = await _userRepository.GetByEmailAsync(request.Email);
+            if (user is null)
+                throw new NotFoundException("User not found");
+
             var isValid = await _userRepository.CheckPasswordAsync(
                 request.Email,
                 request.Password);
 
             if (!isValid)
                 throw new UnauthorizedException("Invalid credentials");
-
-            var user = await _userRepository.GetByEmailAsync(request.Email);
-
-            if (user is null)
-                throw new NotFoundException("User not found");
 
             var token = await _jwtTokenGenerator.GenerateTokenAsync(user, cancellationToken);
 
