@@ -49,7 +49,8 @@ public static class DependencyInjection
         
         services.AddScoped<ICurrentUserContext, CurrentUserContext>();
         services.AddScoped<ITenantProvider, TenantProvider>();
-        services.AddScoped<ITenantDatabaseService, SumX.Infrastructure.Persistence.Tenants.Services.TenantDatabaseService>();
+        services.AddSingleton<ITenantConnectionStringBuilder, Persistence.Tenants.Services.TenantConnectionStringBuilder>();
+        services.AddScoped<ITenantDatabaseService, Persistence.Tenants.Services.TenantDatabaseService>();
         services.AddDbContext<TenantDbContext>();
 
         return services;

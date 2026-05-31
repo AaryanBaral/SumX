@@ -12,6 +12,7 @@ namespace SumX.API.Controllers.Auth
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/auth")]
+    [Authorize]
     public class AuthController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -21,6 +22,7 @@ namespace SumX.API.Controllers.Auth
             _mediator = mediator;
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<AuthResult>> Login(LoginRequest request)
         {

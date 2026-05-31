@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
+
 using System.Security.Claims;
-using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SumX.API.Models.Employee;
-using SumX.Application.Common.Exceptions;
 using SumX.Application.Employees.Commands.CreateEmployee;
 using SumX.Application.Employees.Commands.DeleteEmployee;
 using SumX.Application.Employees.Commands.UpdateEmployee;
@@ -14,6 +11,7 @@ using SumX.Application.Employees.Queries;
 using SumX.Application.Employees.Queries.GetAllEmployees;
 using SumX.Application.Employees.Queries.GetEmployeeById;
 
+using SumX.Application.Common.Constants;
 using SumX.Application.Employees.Queries.GetEmployeeByEmail;
 
 namespace SumX.API.Controllers.Tenants
@@ -21,7 +19,7 @@ namespace SumX.API.Controllers.Tenants
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/employees")]
-    [Authorize(Roles = "Admin,Employee")]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Employee}")]
     public sealed class EmployeesController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -32,7 +30,7 @@ namespace SumX.API.Controllers.Tenants
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<Guid>> Create(CreateEmployeeRequest request)
         {
             var command = new CreateEmployeeCommand(request.FullName, request.Email);
@@ -41,7 +39,7 @@ namespace SumX.API.Controllers.Tenants
         }
 
         [HttpPut("{id:guid}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<Guid>> Update(Guid id, UpdateEmployeeRequest request)
         {
             var command = new UpdateEmployeeCommand(id, request.FullName, request.Email);
@@ -50,7 +48,7 @@ namespace SumX.API.Controllers.Tenants
         }
 
         [HttpDelete("{id:guid}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<Guid>> Delete(Guid id)
         {
             var command = new DeleteEmployeeCommand(id);
@@ -59,7 +57,7 @@ namespace SumX.API.Controllers.Tenants
         }
 
         [HttpGet("me")]
-        [Authorize(Roles = "Employee")]
+        [Authorize(Roles = Roles.Employee)]
         public async Task<ActionResult<EmployeeDto>> GetMe()
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? User.FindFirst("email")?.Value;
@@ -73,6 +71,7 @@ namespace SumX.API.Controllers.Tenants
         }
 
         [HttpGet("{id:guid}")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<EmployeeDto>> GetById(Guid id)
         {
             var query = new GetEmployeeByIdQuery(id);
@@ -81,7 +80,7 @@ namespace SumX.API.Controllers.Tenants
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetAll()
         {
             var query = new GetAllEmployeesQuery();

@@ -105,11 +105,13 @@ When a `SuperAdmin` triggers `CreateTenantCommand`, the following orchestration 
                                                       └──> 3. Create tenant Admin user in MasterDb
 ```
 
-1.  **Database Provisioning**: A `TenantDbContext` is created for the supplied connection string and EF Core migrations are applied (`MigrateAsync()`).
-2.  **Metadata Persistence**: Tenant properties (ID, name, email, unique 4-character tenant code, connection string) are stored in the Master database `Tenants` table.
+1.  **Database Provisioning**: Connection string is derived from `MasterDb` credentials and tenant code (`sumx_tenant_{code}`). PostgreSQL creates the database if needed, then EF Core migrations run (`MigrateAsync()`).
+2.  **Metadata Persistence**: Tenant metadata (including the internal connection string) is stored in the Master database `Tenants` table. API responses expose only `databaseName`, never credentials or full connection strings.
 3.  **Tenant Admin Creation**: An Identity user is created in the Master database with the tenant `TenantId` and `Admin` role.
 
-If step 2 or 3 fails after the tenant database was provisioned, the handler rolls back by deleting any persisted tenant row from the Master database and dropping the tenant database (`EnsureDeletedAsync`).
+If step 2 or 3 fails after provisioning, the handler compensates by deleting any created admin user, removing the tenant row, and dropping the tenant database.
+
+**Delete tenant**: Removes all master-db users for that tenant, drops the tenant PostgreSQL database, then deletes the tenant row.
 
 ---
 
@@ -160,7 +162,9 @@ curl -X POST http://localhost:5290/api/v1.0/auth/login \
 ### 2. Create Tenant (SuperAdmin Only)
 **POST** `/api/v1.0/tenants`
 
-Required fields: `name`, `email`, `tenantId` (exactly 4 characters), `databaseConnectionString`, `adminPassword` (min 6 characters).
+Required fields: `name`, `email`, `tenantId` (exactly 4 characters), `adminPassword` (min 6 characters). The tenant database name is auto-derived (`sumx_tenant_acme` for code `ACME`).
+
+Set `Jwt:SecretKey` or environment variable `SUMX_JWT_SECRET` (minimum 32 characters). Development defaults are in `appsettings.Development.json`. Use Swagger **Authorize** with `Bearer <token>` after login.
 
 ```bash
 curl -X POST http://localhost:5290/api/v1.0/tenants \
@@ -170,7 +174,6 @@ curl -X POST http://localhost:5290/api/v1.0/tenants \
        "name": "Acme Corporation",
        "email": "admin@acme.com",
        "tenantId": "ACME",
-       "databaseConnectionString": "Host=127.0.0.1;Port=5432;Database=sumx_tenant_acme;Username=postgres;Password=postgres",
        "adminPassword": "Admin@123"
      }'
 ```

@@ -35,7 +35,6 @@ namespace SumX.API.Controllers.Tenants
                 request.Name,
                 request.Email,
                 request.TenantId,
-                request.DatabaseConnectionString,
                 request.AdminPassword);
 
             var id = await _mediator.Send(command);
@@ -48,8 +47,7 @@ namespace SumX.API.Controllers.Tenants
             var command = new UpdateTenantCommand(
                 id,
                 request.Name,
-                request.Email,
-                request.DatabaseConnectionString);
+                request.Email);
 
             var updatedId = await _mediator.Send(command);
             return Ok(updatedId);

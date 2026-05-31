@@ -16,6 +16,7 @@ namespace SumX.Application.User.Interface
         Task AssignTenantAsync(Guid userId, Guid tenantId);
         Task UpdateAsync(ApplicationUser user);
         Task DeleteAsync(Guid userId);
+        Task DeleteByTenantIdAsync(Guid tenantId);
         Task<bool> CheckPasswordAsync(string email, string password);
     }
 }

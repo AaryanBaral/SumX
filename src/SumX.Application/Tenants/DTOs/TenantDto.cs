@@ -5,4 +5,4 @@ public sealed record TenantDto(
     string Name,
     string Email,
     string TenantId,
-    string DatabaseConnectionString);
+    string DatabaseName);

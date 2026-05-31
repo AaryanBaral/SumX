@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SumX.Application.Common.Exceptions;
 using SumX.Application.User.Interface;
 using SumX.Domain.Entities;
@@ -163,6 +164,25 @@ namespace SumX.Infrastructure.Persistence.Master.Repositories
                     deleteResult.Errors.Select(error => new FluentValidation.Results.ValidationFailure(
                         error.Code,
                         error.Description)));
+            }
+        }
+
+        public async Task DeleteByTenantIdAsync(Guid tenantId)
+        {
+            var users = await _userManager.Users
+                .Where(u => u.TenantId == tenantId)
+                .ToListAsync();
+
+            foreach (var user in users)
+            {
+                var deleteResult = await _userManager.DeleteAsync(user);
+                if (!deleteResult.Succeeded)
+                {
+                    throw new AppValidationException(
+                        deleteResult.Errors.Select(error => new FluentValidation.Results.ValidationFailure(
+                            error.Code,
+                            error.Description)));
+                }
             }
         }
 

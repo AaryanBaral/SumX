@@ -19,10 +19,6 @@ namespace SumX.Application.Tenants.Commands.CreateTenant
                 .NotEmpty().WithMessage("Tenant code is required.")
                 .Length(4).WithMessage("Tenant code must be exactly 4 characters.");
 
-            RuleFor(v => v.DatabaseConnectionString)
-                .NotEmpty().WithMessage("Database connection string is required.")
-                .MaximumLength(2048);
-
             RuleFor(v => v.AdminPassword)
                 .NotEmpty().WithMessage("Admin password is required.")
                 .MinimumLength(6).WithMessage("Password must be at least 6 characters.");

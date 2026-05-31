@@ -37,7 +37,7 @@ namespace SumX.Application.Auth.Commands.LoginUser
             if (user is null)
                 throw new NotFoundException("User not found");
 
-            var token = _jwtTokenGenerator.GenerateToken(user);
+            var token = await _jwtTokenGenerator.GenerateTokenAsync(user, cancellationToken);
 
             return new AuthResult
             {

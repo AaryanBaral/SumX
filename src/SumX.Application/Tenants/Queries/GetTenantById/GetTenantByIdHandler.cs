@@ -15,13 +15,16 @@ namespace SumX.Application.Tenants.Queries.GetTenantById
     {
         private readonly ITenantRepository _tenantRepository;
         private readonly ICurrentUserContext _currentUserContext;
+        private readonly ITenantConnectionStringBuilder _connectionStringBuilder;
 
         public GetTenantByIdHandler(
             ITenantRepository tenantRepository,
-            ICurrentUserContext currentUserContext)
+            ICurrentUserContext currentUserContext,
+            ITenantConnectionStringBuilder connectionStringBuilder)
         {
             _tenantRepository = tenantRepository;
             _currentUserContext = currentUserContext;
+            _connectionStringBuilder = connectionStringBuilder;
         }
 
         public async Task<TenantDto> Handle(GetTenantByIdQuery request, CancellationToken cancellationToken)
@@ -37,7 +40,7 @@ namespace SumX.Application.Tenants.Queries.GetTenantById
                 throw new NotFoundException("Tenant not found.");
             }
 
-            return tenant.ToDto();
+            return tenant.ToDto(_connectionStringBuilder);
         }
     }
 }

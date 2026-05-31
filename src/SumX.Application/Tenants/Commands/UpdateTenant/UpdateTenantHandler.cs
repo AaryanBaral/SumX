@@ -37,7 +37,6 @@ namespace SumX.Application.Tenants.Commands.UpdateTenant
 
             tenant.Rename(request.Name);
             tenant.ChangeEmail(request.Email);
-            tenant.ChangeDatabaseConnectionString(request.DatabaseConnectionString);
 
             await _tenantRepository.UpdateAsync(tenant);
 

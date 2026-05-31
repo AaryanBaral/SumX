@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using SumX.Domain.Entities;
 
-namespace SumX.Application.Auth.Interfaces
+namespace SumX.Application.Auth.Interfaces;
+
+public interface IJwtTokenGenerator
 {
-    public interface IJwtTokenGenerator
-    {
-        string GenerateToken(ApplicationUser user);
-    }
+    Task<string> GenerateTokenAsync(ApplicationUser user, CancellationToken cancellationToken = default);
 }

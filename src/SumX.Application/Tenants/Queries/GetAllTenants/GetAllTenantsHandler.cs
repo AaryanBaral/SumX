@@ -16,13 +16,16 @@ namespace SumX.Application.Tenants.Queries.GetAllTenants
     {
         private readonly ITenantRepository _tenantRepository;
         private readonly ICurrentUserContext _currentUserContext;
+        private readonly ITenantConnectionStringBuilder _connectionStringBuilder;
 
         public GetAllTenantsHandler(
             ITenantRepository tenantRepository,
-            ICurrentUserContext currentUserContext)
+            ICurrentUserContext currentUserContext,
+            ITenantConnectionStringBuilder connectionStringBuilder)
         {
             _tenantRepository = tenantRepository;
             _currentUserContext = currentUserContext;
+            _connectionStringBuilder = connectionStringBuilder;
         }
 
         public async Task<IReadOnlyList<TenantDto>> Handle(GetAllTenantsQuery request, CancellationToken cancellationToken)
@@ -33,7 +36,7 @@ namespace SumX.Application.Tenants.Queries.GetAllTenants
             }
 
             var tenants = await _tenantRepository.GetAllAsync(request.TrackChanges);
-            return tenants.Select(t => t.ToDto()).ToList();
+            return tenants.Select(t => t.ToDto(_connectionStringBuilder)).ToList();
         }
     }
 }

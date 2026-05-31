@@ -24,7 +24,7 @@ builder.Services.AddApiVersioning(options =>
     options.ReportApiVersions = true;
 });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerWithJwt();
 
 var app = builder.Build();
 
