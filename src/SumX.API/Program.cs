@@ -49,10 +49,17 @@ using (var scope = app.Services.CreateScope())
         var migrator = scope.ServiceProvider.GetRequiredService<IMasterDatabaseMigrator>();
         await migrator.MigrateAsync();
         logger.LogInformation("Master database migrations applied successfully.");
+
+        var seeder = scope.ServiceProvider.GetRequiredService<IMasterDbSeeder>();
+        var seeded = await seeder.SeedAsync();
+        if (seeded)
+        {
+            logger.LogInformation("Master database seeded successfully.");
+        }
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Failed to apply master database migrations.");
+        logger.LogError(ex, "Failed to apply master database migrations/seeding.");
         throw;
     }
 }

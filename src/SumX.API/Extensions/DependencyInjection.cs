@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using SumX.Application.Auth;
 
 namespace SumX.API.Extensions;
@@ -60,7 +62,46 @@ public static class DependencyInjection
                     ValidAudience = jwt.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(secretKey)),
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew = TimeSpan.Zero,
+                    NameClaimType = System.Security.Claims.ClaimTypes.NameIdentifier,
+                    RoleClaimType = System.Security.Claims.ClaimTypes.Role
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnChallenge = async context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/problem+json";
+
+                        var problemDetails = new ProblemDetails
+                        {
+                            Status = StatusCodes.Status401Unauthorized,
+                            Title = "Unauthorized",
+                            Detail = string.IsNullOrEmpty(context.ErrorDescription) ? "You are not authorized to access this resource." : context.ErrorDescription,
+                            Instance = context.Request.Path
+                        };
+                        problemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
+
+                        await context.Response.WriteAsJsonAsync(problemDetails);
+                    },
+                    OnForbidden = async context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        context.Response.ContentType = "application/problem+json";
+
+                        var problemDetails = new ProblemDetails
+                        {
+                            Status = StatusCodes.Status403Forbidden,
+                            Title = "Forbidden",
+                            Detail = "You do not have permission to access this resource.",
+                            Instance = context.Request.Path
+                        };
+                        problemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
+
+                        await context.Response.WriteAsJsonAsync(problemDetails);
+                    }
                 };
             });
 

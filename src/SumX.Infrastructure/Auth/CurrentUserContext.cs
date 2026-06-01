@@ -37,7 +37,9 @@ namespace SumX.Infrastructure.Auth
             }
         }
 
-        public string Role => User?.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+        public string Role => User?.FindFirst(ClaimTypes.Role)?.Value 
+            ?? User?.FindFirst("role")?.Value 
+            ?? string.Empty;
 
         public string Email => User?.FindFirst(ClaimTypes.Email)?.Value
             ?? User?.FindFirst("email")?.Value
